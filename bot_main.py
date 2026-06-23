@@ -108,11 +108,12 @@ def main():
 
     # 1. Índice atual
     idx = carregar_indice()
-    log.info(f"📌 Índice: {idx + 1}/{TOTAL_POSTS}")
-
+    
+    # Se por acaso o índice estiver fora do limite, forçar reset (ciclo infinito)
     if idx >= TOTAL_POSTS:
-        log.info("✅ Ciclo de 18 posts completo. Nada a fazer.")
-        sys.exit(0)
+        idx = 0
+        
+    log.info(f"📌 Índice: {idx + 1}/{TOTAL_POSTS}")
 
     prompt = PROMPTS[idx]
     log.info(f"📝 Prompt: {prompt[:100]}...")
