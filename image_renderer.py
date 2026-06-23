@@ -87,8 +87,8 @@ def gravar_video_916(conteudo: dict) -> str | None:
             page.set_content(html_content, wait_until="networkidle", timeout=30000)
             page.evaluate("document.fonts.ready")
             
-            # Tempo de duração do Reel (5.5 segundos)
-            page.wait_for_timeout(5500)
+            # Tempo de duração do Reel (15 segundos para dar tempo à música)
+            page.wait_for_timeout(15000)
 
             # Para fechar e salvar o arquivo de vídeo corretamente, fechamos context
             video_path = page.video.path()
