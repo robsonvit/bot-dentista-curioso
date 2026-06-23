@@ -85,6 +85,7 @@ def baixar_audio_em_alta() -> str | None:
             'quiet': True,
             'no_warnings': True,
             'match_filter': yt_dlp.utils.match_filter_func("duration < 300"), # até 5 minutos
+            'extractor_args': {'youtube': ['player_client=android,mweb,web']}, # BYPASS YOUTUBE BOT BLOCK
         }
         
         try:
