@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """
 audio_downloader.py
-Busca aleatoriamente um áudio em alta (TikTok/Reels) usando yt-dlp.
+Busca dinamicamente as músicas do Top 50 Spotify Brasil no Kworb, 
+escolhe uma aleatoriamente e faz o download exato do áudio via YouTube (yt-dlp).
 """
 
 import os
 import random
 import logging
+import requests
+import re
 from pathlib import Path
 import yt_dlp
 
@@ -15,16 +18,7 @@ log = logging.getLogger(__name__)
 _DIR = Path(__file__).parent
 AUDIOS_DIR = _DIR / "audios"
 
-# Garante que a pasta audios/ existe
 os.makedirs(AUDIOS_DIR, exist_ok=True)
-
-# Consultas de busca para variar os resultados
-SEARCH_QUERIES = [
-    "ytsearch50:tiktok viral audio shorts",
-    "ytsearch50:trending reels audio short",
-    "ytsearch50:aesthetic vlog no copyright music short",
-    "ytsearch50:tiktok song 2024 viral"
-]
 
 def limpar_pasta_audios():
     """Remove qualquer arquivo .mp3 antigo da pasta audios/."""
@@ -36,90 +30,77 @@ def limpar_pasta_audios():
             except Exception as e:
                 log.warning(f"⚠️ Falha ao apagar {f}: {e}")
 
+def obter_musicas_em_alta_spotify() -> list:
+    """Acessa o ranking diário do Spotify Brasil e retorna uma lista de 'Artista - Música'."""
+    url = "https://kworb.net/spotify/country/br_daily.html"
+    log.info(f"🌐 Lendo o Top 200 do Spotify Brasil em: {url}")
+    try:
+        r = requests.get(url, timeout=10)
+        # Extrai os nomes usando regex na tabela do Kworb
+        matches = re.findall(r'<td class="text[^>]*><div><a href="[^"]+">([^<]+)</a> - <a href="[^"]+">([^<]+)</a>', r.text)
+        
+        musicas = []
+        # Pega as top 50
+        for artist, title in matches[:50]:
+            # Evita nomes com aspas duplas que quebram a busca no shell
+            artista_limpo = artist.replace('"', '').strip()
+            titulo_limpo = title.replace('"', '').strip()
+            musicas.append(f"{artista_limpo} - {titulo_limpo}")
+            
+        log.info(f"✅ Sucesso: Encontradas {len(musicas)} músicas no Top 50 do Spotify!")
+        return musicas
+    except Exception as e:
+        log.error(f"❌ Erro ao acessar o ranking do Spotify: {e}")
+        return []
+
 def baixar_audio_em_alta() -> str | None:
     """
-    Limpa a pasta de áudios, busca um vídeo curto no YouTube, 
-    baixa apenas o áudio convertido em MP3 e salva na pasta audios/.
-    Retorna o nome do arquivo baixado ou None se falhar.
+    Limpa a pasta de áudios, escolhe uma música do Top Spotify Brasil, 
+    busca ativamente no YouTube e baixa o MP3.
     """
     limpar_pasta_audios()
     
-    query = random.choice(SEARCH_QUERIES)
-    log.info(f"🔍 Buscando músicas em alta via yt-dlp... ({query})")
-
-    # Primeiro, extraímos as informações dos 50 resultados sem baixar
-    ydl_opts_extract = {
-        'quiet': True,
-        'extract_flat': True,
-    }
+    musicas_top_50 = obter_musicas_em_alta_spotify()
     
-    try:
-        with yt_dlp.YoutubeDL(ydl_opts_extract) as ydl:
-            result = ydl.extract_info(query, download=False)
-            
-            if 'entries' not in result or not result['entries']:
-                log.error("❌ Nenhum vídeo encontrado na busca.")
-                return None
-                
-            # Filtra os vídeos para garantir que são curtos (menos de 3 minutos)
-            videos = []
-            for entry in result['entries']:
-                duracao = entry.get('duration')
-                # Algumas extrações flat não trazem duration, aceitamos as que trazem e são curtas
-                # ou assumimos risco nas sem duration se a lista ficar vazia
-                if duracao and duracao < 180:
-                    videos.append(entry)
-            
-            if not videos:
-                log.warning("⚠️ Nenhum vídeo com menos de 3 minutos encontrado com duração explícita, pegando os primeiros.")
-                videos = list(result['entries'])[:10]
-                
-            random.shuffle(videos)
-            
-            # Tentar baixar até conseguir
-            for video_escolhido in videos:
-                video_url = video_escolhido.get('url') or video_escolhido.get('webpage_url')
-                
-                if not video_url.startswith("http"):
-                    video_url = f"https://www.youtube.com/watch?v={video_url}"
-                    
-                log.info(f"🎯 Tentando baixar: {video_url} ({video_escolhido.get('title', 'Sem título')})")
-                
-                output_template = str(AUDIOS_DIR / "musica_%(id)s.%(ext)s")
-                
-                ydl_opts_download = {
-                    'format': 'bestaudio/best',
-                    'outtmpl': output_template,
-                    'postprocessors': [{
-                        'key': 'FFmpegExtractAudio',
-                        'preferredcodec': 'mp3',
-                        'preferredquality': '192',
-                    }],
-                    'quiet': True,
-                    'no_warnings': True,
-                    # Segurança adicional
-                    'match_filter': yt_dlp.utils.match_filter_func("duration < 180"),
-                }
-                
-                try:
-                    with yt_dlp.YoutubeDL(ydl_opts_download) as ydl_dl:
-                        ydl_dl.download([video_url])
-                    
-                    # Verifica se o arquivo foi criado
-                    arquivos = [f for f in os.listdir(AUDIOS_DIR) if f.lower().endswith(".mp3")]
-                    if arquivos:
-                        log.info(f"✅ Áudio baixado com sucesso: {arquivos[0]}")
-                        return arquivos[0]
-                except Exception as e:
-                    log.warning(f"⚠️ Falha no download deste vídeo: {e}. Tentando o próximo...")
-                    continue
-            
-            log.error("❌ Todas as tentativas de download falharam.")
-            return None
-
-    except Exception as e:
-        log.error(f"❌ Erro durante a busca ou download do áudio: {e}")
+    if not musicas_top_50:
+        log.error("❌ Não foi possível buscar o ranking. Fallback desativado.")
         return None
+        
+    random.shuffle(musicas_top_50)
+    
+    for musica_escolhida in musicas_top_50:
+        query = f"ytsearch1:{musica_escolhida} oficial audio"
+        log.info(f"🎯 Tentando baixar a música selecionada: '{musica_escolhida}'")
+        
+        output_template = str(AUDIOS_DIR / "musica_%(id)s.%(ext)s")
+        
+        ydl_opts_download = {
+            'format': 'bestaudio/best',
+            'outtmpl': output_template,
+            'postprocessors': [{
+                'key': 'FFmpegExtractAudio',
+                'preferredcodec': 'mp3',
+                'preferredquality': '192',
+            }],
+            'quiet': True,
+            'no_warnings': True,
+            'match_filter': yt_dlp.utils.match_filter_func("duration < 300"), # até 5 minutos
+        }
+        
+        try:
+            with yt_dlp.YoutubeDL(ydl_opts_download) as ydl_dl:
+                ydl_dl.download([query])
+            
+            arquivos = [f for f in os.listdir(AUDIOS_DIR) if f.lower().endswith(".mp3")]
+            if arquivos:
+                log.info(f"✅ Áudio baixado com sucesso: {arquivos[0]}")
+                return arquivos[0]
+        except Exception as e:
+            log.warning(f"⚠️ Falha no download desta música: {e}. Tentando a próxima...")
+            continue
+            
+    log.error("❌ Todas as tentativas de download falharam.")
+    return None
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
