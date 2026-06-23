@@ -27,46 +27,18 @@
       font-family: 'DM Sans', sans-serif;
     }
 
-    /* O canvas agora usa 100vh para se adaptar a 1350px (4:5) ou 1920px (9:16) */
     #post-canvas {
       width: 1080px;
-      height: 100vh;
+      height: 1080px;
       position: relative;
       overflow: hidden;
       flex-shrink: 0;
-      display: flex;
-      flex-direction: column;
     }
 
-    /* ── Utilitários & Animações ─────────────────────────────────────────────── */
+    /* ── Utilitários ─────────────────────────────────────────────────────────── */
     .fill { position: absolute; inset: 0; }
     .center { display: flex; align-items: center; justify-content: center; }
     .col { flex-direction: column; }
-
-    @keyframes slideUpFade {
-      from { opacity: 0; transform: translateY(60px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes scaleIn {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .anim-up { opacity: 0; animation: slideUpFade 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-    .anim-fade { opacity: 0; animation: fadeIn 1s ease-out forwards; }
-    .anim-scale { opacity: 0; animation: scaleIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
-    
-    /* Delays */
-    .d-1 { animation-delay: 0.2s; }
-    .d-2 { animation-delay: 0.4s; }
-    .d-3 { animation-delay: 0.6s; }
-    .d-4 { animation-delay: 0.8s; }
-    .d-5 { animation-delay: 1.0s; }
-    .d-6 { animation-delay: 1.2s; }
 
     /* ── TEMPLATE: TECNICO ───────────────────────────────────────────────────── */
     .tpl-tecnico {
@@ -76,25 +48,25 @@
     .tecnico-accent-bar {
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 8px;
+      height: 6px;
       background: linear-gradient(90deg, #0077b6, #00b4d8, #0077b6);
     }
 
     .tecnico-bg-glow {
       position: absolute;
-      width: 800px; height: 800px;
+      width: 600px; height: 600px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(0,119,182,0.15) 0%, transparent 70%);
-      top: -200px; right: -200px;
+      top: -100px; right: -100px;
     }
 
     .tecnico-tag {
       position: absolute;
-      top: 60px; left: 60px;
+      top: 48px; left: 48px;
       background: rgba(0,119,182,0.25);
       border: 1px solid rgba(0,119,182,0.6);
       border-radius: 10px;
-      padding: 12px 24px;
+      padding: 10px 22px;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -103,7 +75,7 @@
     .tecnico-tag span {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 28px;
+      font-size: 26px;
       color: #90e0ef;
       letter-spacing: 0.12em;
       text-transform: uppercase;
@@ -111,26 +83,26 @@
 
     .tecnico-handle {
       position: absolute;
-      bottom: 60px;
+      bottom: 44px;
       left: 50%;
       transform: translateX(-50%);
       background: rgba(0,0,0,0.5);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 30px;
-      padding: 12px 32px;
+      border-radius: 24px;
+      padding: 10px 28px;
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
     .tecnico-handle-logo {
-      width: 40px; height: 40px;
+      width: 34px; height: 34px;
       border-radius: 50%;
       background: #0077b6;
       display: flex; align-items: center; justify-content: center;
       font-family: 'Syne', sans-serif;
       font-weight: 900;
-      font-size: 20px;
+      font-size: 18px;
       color: white;
       flex-shrink: 0;
     }
@@ -138,23 +110,23 @@
     .tecnico-handle span {
       font-family: 'DM Sans', sans-serif;
       font-weight: 600;
-      font-size: 28px;
+      font-size: 26px;
       color: rgba(255,255,255,0.75);
       letter-spacing: 0.02em;
     }
 
     .tecnico-content {
-      flex: 1;
+      position: absolute;
+      inset: 140px 60px 110px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 0 80px;
     }
 
     .tecnico-title {
       font-family: 'Syne', sans-serif;
       font-weight: 900;
-      font-size: 76px;
+      font-size: 72px;
       color: #ffffff;
       line-height: 1.05;
       letter-spacing: -0.03em;
@@ -162,41 +134,41 @@
     }
 
     .tecnico-divider {
-      width: 100px;
-      height: 5px;
+      width: 80px;
+      height: 4px;
       background: linear-gradient(90deg, #0077b6, #00b4d8);
-      border-radius: 3px;
-      margin-bottom: 40px;
+      border-radius: 2px;
+      margin-bottom: 36px;
     }
 
     .tecnico-items {
       display: flex;
       flex-direction: column;
-      gap: 24px;
+      gap: 20px;
     }
 
     .tecnico-item {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
       background: rgba(255,255,255,0.04);
       border: 1px solid rgba(255,255,255,0.08);
-      border-left: 4px solid #0077b6;
-      border-radius: 0 14px 14px 0;
-      padding: 18px 24px;
+      border-left: 3px solid #0077b6;
+      border-radius: 0 12px 12px 0;
+      padding: 14px 20px;
     }
 
     .tecnico-item-key {
       font-family: 'DM Sans', sans-serif;
       font-weight: 700;
-      font-size: 34px;
+      font-size: 30px;
       color: #90e0ef;
     }
 
     .tecnico-item-val {
       font-family: 'DM Sans', sans-serif;
       font-weight: 400;
-      font-size: 30px;
+      font-size: 26px;
       color: rgba(240,237,232,0.8);
       line-height: 1.4;
     }
@@ -204,8 +176,6 @@
     /* ── TEMPLATE: MEME / CARREIRA (Twitter Dark) ────────────────────────────── */
     .tpl-meme {
       background: #15202b;
-      justify-content: center;
-      padding: 80px;
     }
 
     .meme-bg-pattern {
@@ -217,26 +187,25 @@
     }
 
     .meme-card {
-      position: relative;
+      position: absolute;
+      inset: 80px;
       background: #192734;
-      border-radius: 32px;
+      border-radius: 24px;
       border: 1px solid rgba(255,255,255,0.08);
-      padding: 60px 70px;
+      padding: 56px 60px;
       display: flex;
       flex-direction: column;
-      width: 100%;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     }
 
     .meme-header {
       display: flex;
       align-items: center;
-      gap: 24px;
+      gap: 20px;
       margin-bottom: 40px;
     }
 
     .meme-avatar {
-      width: 80px; height: 80px;
+      width: 72px; height: 72px;
       border-radius: 50%;
       background: linear-gradient(135deg, #0077b6, #00b4d8);
       display: flex;
@@ -244,7 +213,7 @@
       justify-content: center;
       font-family: 'Syne', sans-serif;
       font-weight: 900;
-      font-size: 36px;
+      font-size: 32px;
       color: white;
       flex-shrink: 0;
     }
@@ -253,46 +222,48 @@
     .meme-author-name {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 36px;
+      font-size: 32px;
       color: #fff;
     }
     .meme-author-handle {
       font-family: 'DM Sans', sans-serif;
       font-weight: 400;
-      font-size: 28px;
+      font-size: 26px;
       color: rgba(255,255,255,0.5);
     }
 
     .meme-twitter-icon {
       margin-left: auto;
-      width: 48px; height: 48px;
+      width: 42px; height: 42px;
       opacity: 0.4;
     }
 
     .meme-text {
       font-family: 'DM Sans', sans-serif;
       font-weight: 400;
-      font-size: 42px;
+      font-size: 38px;
       color: #fff;
       line-height: 1.55;
+      flex: 1;
+      overflow: hidden;
     }
 
     .meme-footer {
       display: flex;
       align-items: center;
-      gap: 36px;
-      margin-top: 40px;
-      padding-top: 32px;
+      gap: 32px;
+      margin-top: 36px;
+      padding-top: 28px;
       border-top: 1px solid rgba(255,255,255,0.08);
     }
 
     .meme-stat {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       font-family: 'DM Sans', sans-serif;
       font-weight: 500;
-      font-size: 28px;
+      font-size: 26px;
       color: rgba(255,255,255,0.5);
     }
 
@@ -304,64 +275,64 @@
     .quiz-top-bar {
       position: absolute;
       top: 0; left: 0; right: 0;
-      height: 8px;
+      height: 6px;
       background: linear-gradient(90deg, #00b4d8, #48cae4, #00b4d8);
     }
 
     .quiz-tag {
       position: absolute;
-      top: 60px; left: 60px;
+      top: 48px; left: 48px;
       background: rgba(0,180,216,0.2);
       border: 1px solid rgba(0,180,216,0.5);
-      border-radius: 12px;
-      padding: 12px 24px;
+      border-radius: 10px;
+      padding: 10px 22px;
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 28px;
+      font-size: 26px;
       color: #90e0ef;
       letter-spacing: 0.1em;
     }
 
     .quiz-content {
-      flex: 1;
+      position: absolute;
+      inset: 140px 60px 60px;
       display: flex;
       flex-direction: column;
       justify-content: center;
-      padding: 0 80px;
     }
 
     .quiz-emoji {
-      font-size: 80px;
-      margin-bottom: 24px;
+      font-size: 64px;
+      margin-bottom: 20px;
       text-align: center;
     }
 
     .quiz-question {
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 52px;
+      font-size: 46px;
       color: #fff;
       line-height: 1.2;
       text-align: center;
-      margin-bottom: 50px;
+      margin-bottom: 44px;
       letter-spacing: -0.02em;
     }
 
     .quiz-options {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 40px;
+      gap: 18px;
+      margin-bottom: 36px;
     }
 
     .quiz-option {
       background: rgba(255,255,255,0.06);
       border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 16px;
-      padding: 24px 28px;
+      border-radius: 14px;
+      padding: 20px 24px;
       font-family: 'DM Sans', sans-serif;
       font-weight: 600;
-      font-size: 32px;
+      font-size: 28px;
       color: #f0ede8;
       text-align: center;
       line-height: 1.3;
@@ -370,24 +341,24 @@
     .quiz-answer-badge {
       background: rgba(0,119,182,0.3);
       border: 1px solid rgba(0,119,182,0.6);
-      border-radius: 50px;
-      padding: 20px 48px;
+      border-radius: 40px;
+      padding: 16px 40px;
       text-align: center;
       font-family: 'Syne', sans-serif;
       font-weight: 700;
-      font-size: 34px;
+      font-size: 30px;
       color: #90e0ef;
       margin: 0 auto;
     }
 
     .quiz-handle {
       position: absolute;
-      bottom: 60px;
+      bottom: 44px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'DM Sans', sans-serif;
       font-weight: 600;
-      font-size: 28px;
+      font-size: 24px;
       color: rgba(255,255,255,0.4);
       white-space: nowrap;
     }
@@ -399,70 +370,70 @@
 
     .mito-glow {
       position: absolute;
-      width: 900px; height: 900px;
+      width: 700px; height: 700px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(220,80,20,0.12) 0%, transparent 70%);
-      top: -200px; left: -200px;
+      top: -150px; left: -150px;
     }
 
     .mito-tag {
       position: absolute;
-      top: 60px; left: 60px;
+      top: 48px; left: 48px;
       background: rgba(220,80,20,0.2);
       border: 1px solid rgba(220,80,20,0.5);
-      border-radius: 12px;
-      padding: 12px 24px;
+      border-radius: 10px;
+      padding: 10px 22px;
       font-family: 'Syne', sans-serif;
       font-weight: 800;
-      font-size: 28px;
+      font-size: 26px;
       color: #fb923c;
       letter-spacing: 0.1em;
     }
 
     .mito-content {
-      flex: 1;
+      position: absolute;
+      inset: 140px 60px 80px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 0 80px;
     }
 
     .mito-headline {
       font-family: 'Syne', sans-serif;
       font-weight: 900;
-      font-size: 56px;
+      font-size: 50px;
       color: #fb923c;
       letter-spacing: 0.06em;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .mito-claim {
       font-family: 'DM Sans', sans-serif;
       font-weight: 600;
-      font-size: 46px;
+      font-size: 40px;
       color: rgba(240,237,232,0.9);
       line-height: 1.3;
-      margin-bottom: 48px;
+      margin-bottom: 40px;
       padding: 0 20px;
     }
 
     .mito-verdict {
       font-family: 'Syne', sans-serif;
       font-weight: 900;
-      font-size: 130px;
+      font-size: 110px;
       letter-spacing: -0.03em;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
       line-height: 1;
     }
-    .mito-verdict.mito { color: #ef4444; text-shadow: 0 0 50px rgba(239,68,68,0.5); }
-    .mito-verdict.fato { color: #22c55e; text-shadow: 0 0 50px rgba(34,197,94,0.5); }
+    .mito-verdict.mito { color: #ef4444; text-shadow: 0 0 40px rgba(239,68,68,0.5); }
+    .mito-verdict.fato { color: #22c55e; text-shadow: 0 0 40px rgba(34,197,94,0.5); }
 
     .mito-explanation {
       font-family: 'DM Sans', sans-serif;
       font-weight: 400;
-      font-size: 32px;
+      font-size: 28px;
       color: rgba(240,237,232,0.6);
       line-height: 1.5;
       max-width: 880px;
@@ -470,12 +441,12 @@
 
     .mito-handle {
       position: absolute;
-      bottom: 60px;
+      bottom: 44px;
       left: 50%;
       transform: translateX(-50%);
       font-family: 'DM Sans', sans-serif;
       font-weight: 600;
-      font-size: 28px;
+      font-size: 24px;
       color: rgba(255,255,255,0.35);
       white-space: nowrap;
     }
@@ -510,7 +481,7 @@ function esc(str) {
 
 function renderLogo() {
   const logoDiv = LOGO_SRC
-    ? `<img src="${LOGO_SRC}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;">`
+    ? `<img src="${LOGO_SRC}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`
     : `<div class="tecnico-handle-logo">D</div>`;
   return logoDiv;
 }
@@ -522,8 +493,8 @@ function renderTecnico() {
   const title = (data.topic_title || data.text || '').toUpperCase();
   const imgUrl = data.imageUrl || null;
 
-  let itemsHtml = items.map((item, i) => `
-    <div class="tecnico-item anim-up d-${i+2}">
+  let itemsHtml = items.map(item => `
+    <div class="tecnico-item">
       <div class="tecnico-item-key">${esc(item.key)}</div>
       <div class="tecnico-item-val">${esc(item.value)}</div>
     </div>
@@ -531,16 +502,16 @@ function renderTecnico() {
 
   canvas.className = 'tpl-tecnico';
   canvas.innerHTML = `
-    ${imgUrl ? `<div class="bg-image anim-fade" style="background-image:url('${imgUrl}')"></div>` : ''}
-    <div class="tecnico-accent-bar anim-fade"></div>
-    <div class="tecnico-bg-glow anim-fade"></div>
-    <div class="tecnico-tag anim-up d-1"><span>◆ TÉCNICO ◆</span></div>
+    ${imgUrl ? `<div class="bg-image" style="background-image:url('${imgUrl}')"></div>` : ''}
+    <div class="tecnico-accent-bar"></div>
+    <div class="tecnico-bg-glow"></div>
+    <div class="tecnico-tag"><span>◆ TÉCNICO ◆</span></div>
     <div class="tecnico-content">
-      <div class="tecnico-title anim-up d-1">${esc(title)}</div>
-      <div class="tecnico-divider anim-scale d-1"></div>
+      <div class="tecnico-title">${esc(title)}</div>
+      <div class="tecnico-divider"></div>
       <div class="tecnico-items">${itemsHtml}</div>
     </div>
-    <div class="tecnico-handle anim-up d-6">
+    <div class="tecnico-handle">
       ${renderLogo()}
       <span>@dentistaaa_curioso</span>
     </div>
@@ -554,8 +525,10 @@ function renderMeme() {
   const tagColor = isCarreira ? 'rgba(100,120,180,0.3)' : 'rgba(29,161,242,0.15)';
   const tagBorder = isCarreira ? 'rgba(100,120,180,0.5)' : 'rgba(29,161,242,0.4)';
 
-  const tweetLines = tweet.split(/\\n|\n/).map(l => `<p style="margin-bottom:12px">${esc(l)}</p>`).join('');
+  // Formata quebras de linha do tweet
+  const tweetLines = tweet.split(/\\n|\n/).map(l => `<p style="margin-bottom:8px">${esc(l)}</p>`).join('');
 
+  // Gera likes e hora aleatórios para parecer real
   const likes = ['1.2K','2.4K','3.7K','5.1K','7.8K','12K','4.3K','9.6K'];
   const likeVal = likes[Math.floor(Math.random() * likes.length)];
   const hrs = ['08:14','09:32','10:47','13:22','14:55','16:08','19:41','21:30'];
@@ -563,13 +536,12 @@ function renderMeme() {
 
   canvas.className = 'tpl-meme';
   canvas.innerHTML = `
-    <div class="meme-bg-pattern anim-fade"></div>
-    <div class="anim-up d-1" style="position:absolute;top:60px;left:50%;transform:translateX(-50%);
-      background:${tagColor};border:1px solid ${tagBorder};border-radius:12px;
-      padding:10px 24px;font-family:'Syne',sans-serif;font-weight:800;font-size:26px;
-      color:rgba(255,255,255,0.7);letter-spacing:0.1em; z-index: 10;">${tagLabel}</div>
-    
-    <div class="meme-card anim-scale d-2">
+    <div class="meme-bg-pattern"></div>
+    <div style="position:absolute;top:40px;left:50%;transform:translateX(-50%);
+      background:${tagColor};border:1px solid ${tagBorder};border-radius:10px;
+      padding:8px 20px;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;
+      color:rgba(255,255,255,0.7);letter-spacing:0.1em;">${tagLabel}</div>
+    <div class="meme-card" style="top:110px;">
       <div class="meme-header">
         <div class="meme-avatar">D</div>
         <div class="meme-author-info">
@@ -580,8 +552,8 @@ function renderMeme() {
           <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
         </svg>
       </div>
-      <div class="meme-text anim-fade d-3">${tweetLines}</div>
-      <div class="meme-footer anim-fade d-4">
+      <div class="meme-text">${tweetLines}</div>
+      <div class="meme-footer">
         <div class="meme-stat">❤️ <span>${likeVal}</span></div>
         <div class="meme-stat">🔁 <span>${Math.floor(Math.random()*500+50)}</span></div>
         <div class="meme-stat" style="margin-left:auto;">${hrVal}</div>
@@ -596,19 +568,19 @@ function renderQuiz() {
   const letters = ['A', 'B', 'C', 'D'];
 
   let optHtml = options.slice(0,4).map((opt, i) => `
-    <div class="quiz-option anim-up d-${i+2}"><strong>${letters[i]})</strong> ${esc(opt)}</div>
+    <div class="quiz-option"><strong>${letters[i]})</strong> ${esc(opt)}</div>
   `).join('');
 
   canvas.className = 'tpl-quiz';
   canvas.innerHTML = `
-    <div class="quiz-top-bar anim-fade"></div>
-    <div class="quiz-tag anim-up d-1">❓ QUIZ TÉCNICO</div>
+    <div class="quiz-top-bar"></div>
+    <div class="quiz-tag">❓ QUIZ TÉCNICO</div>
     <div class="quiz-content">
-      <div class="quiz-question anim-up d-1">${esc(question)}</div>
+      <div class="quiz-question">${esc(question)}</div>
       <div class="quiz-options">${optHtml}</div>
-      <div class="quiz-answer-badge anim-scale d-6">💬 Resposta na Legenda!</div>
+      <div class="quiz-answer-badge">💬 Resposta na Legenda!</div>
     </div>
-    <div class="quiz-handle anim-up d-6">@dentistaaa_curioso</div>
+    <div class="quiz-handle">@dentistaaa_curioso</div>
   `;
 }
 
@@ -620,15 +592,15 @@ function renderMito() {
 
   canvas.className = 'tpl-mito';
   canvas.innerHTML = `
-    <div class="mito-glow anim-fade"></div>
-    <div class="mito-tag anim-up d-1">🚫 MITO OU FATO?</div>
+    <div class="mito-glow"></div>
+    <div class="mito-tag">🚫 MITO OU FATO?</div>
     <div class="mito-content">
-      <div class="mito-headline anim-up d-1">MITO OU FATO?</div>
-      <div class="mito-claim anim-up d-2">"${esc(claim)}"</div>
-      <div class="mito-verdict ${verdict} anim-scale d-4">${verdictUpper}</div>
-      <div class="mito-explanation anim-fade d-5">${esc(explain)}</div>
+      <div class="mito-headline">MITO OU FATO?</div>
+      <div class="mito-claim">"${esc(claim)}"</div>
+      <div class="mito-verdict ${verdict}">${verdictUpper}</div>
+      <div class="mito-explanation">${esc(explain)}</div>
     </div>
-    <div class="mito-handle anim-up d-6">@dentistaaa_curioso</div>
+    <div class="mito-handle">@dentistaaa_curioso</div>
   `;
 }
 

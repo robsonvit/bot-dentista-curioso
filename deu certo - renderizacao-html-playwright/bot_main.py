@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-bot_main.py — Bot Dentista Curioso v4 (Multiformato: 4:5 Feed + 9:16 Reel Animado)
-Fluxo: índice → Gemini Flash → Renderizar 4:5 (PNG) → Gravar 9:16 (WEBM) → FFmpeg (MP4 + Áudio) → Facebook API
+bot_main.py — Bot Dentista Curioso v3 (HTML Template + Playwright Screenshot)
+Fluxo: índice → Gemini Flash (conteúdo) → HTML template → Playwright screenshot → Facebook
+Visual idêntico ao canvas DentPost Pro, sem depender de sessão Google.
 """
 
 import os
@@ -14,9 +15,8 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 from gemini_generator import gerar_conteudo
-from image_renderer import renderizar_imagem_45, gravar_video_916
-from video_processor import processar_video_final
-from meta_publisher import publicar_foto, publicar_video
+from image_renderer import renderizar_post
+from meta_publisher import publicar_no_meta
 
 # ─── Logging ──────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -29,8 +29,7 @@ log = logging.getLogger(__name__)
 # ─── Caminhos ─────────────────────────────────────────────────────────────────
 _DIR         = os.path.dirname(os.path.abspath(__file__))
 INDEX_FILE   = os.path.join(_DIR, "post_index.json")
-PREVIEW_IMG  = os.path.join(_DIR, "output_preview.png")
-PREVIEW_VID  = os.path.join(_DIR, "output_reel.mp4")
+PREVIEW_FILE = os.path.join(_DIR, "output_preview.png")
 TOTAL_POSTS  = 18
 
 # ─── Os 18 prompts ────────────────────────────────────────────────────────────
@@ -95,7 +94,7 @@ HASHTAGS = [
 
 # ─── Main ──────────────────────────────────────────────────────────────────────
 def main():
-    log.info("🦷 Bot Dentista Curioso v4 (Multiformato + Reel Animado)")
+    log.info("🦷 Bot Dentista Curioso v3 (DentPost Style) — INICIANDO")
     log.info(f"📅 {datetime.now().strftime('%d/%m/%Y %H:%M:%S')}")
 
     for var in ("FB_TOKEN", "FB_PAGE_ID"):
@@ -109,67 +108,49 @@ def main():
 
     # 1. Índice atual
     idx = carregar_indice()
-    if idx >= TOTAL_POSTS:
-        idx = 0
-        
     log.info(f"📌 Índice: {idx + 1}/{TOTAL_POSTS}")
+
+    if idx >= TOTAL_POSTS:
+        log.info("✅ Ciclo de 18 posts completo. Nada a fazer.")
+        sys.exit(0)
 
     prompt = PROMPTS[idx]
     log.info(f"📝 Prompt: {prompt[:100]}...")
 
-    # 2. Gerar conteúdo com Gemini Flash
+    # 2. Gerar conteúdo estruturado com Gemini Flash
     log.info("🤖 Gerando conteúdo com Gemini Flash...")
     conteudo = gerar_conteudo(prompt)
     if not conteudo:
         log.error("❌ Falha na geração de conteúdo.")
         sys.exit(1)
 
+    # 3. Renderizar template HTML e capturar screenshot via Playwright
+    log.info(f"🎨 Renderizando template visual ({conteudo.get('type')})...")
+    img_bytes = renderizar_post(conteudo)
+    if not img_bytes:
+        log.error("❌ Falha ao renderizar imagem.")
+        sys.exit(1)
+
+    # Salvar preview local
+    with open(PREVIEW_FILE, "wb") as f:
+        f.write(img_bytes)
+    log.info(f"💾 Preview: {PREVIEW_FILE} ({len(img_bytes) // 1024}KB)")
+
+    # 4. Publicar no Facebook
+    log.info("📘 Publicando no Facebook...")
     legenda  = conteudo.get("caption", "")
     hashtags = conteudo.get("hashtags", HASHTAGS[idx])
+    post_id  = publicar_no_meta(img_bytes, legenda, hashtags)
 
-    # 3. Gerar Imagem 4:5 (Feed)
-    log.info("📸 Iniciando renderização da Imagem 4:5...")
-    img_bytes = renderizar_imagem_45(conteudo)
-    if not img_bytes:
-        log.error("❌ Falha ao renderizar imagem 4:5.")
+    if not post_id:
+        log.error("❌ Falha na publicação. Índice NÃO avançado.")
         sys.exit(1)
 
-    with open(PREVIEW_IMG, "wb") as f:
-        f.write(img_bytes)
-
-    # 4. Gerar Vídeo 9:16 (Reel)
-    log.info("🎥 Iniciando gravação do Vídeo animado 9:16...")
-    webm_path = gravar_video_916(conteudo)
-    if not webm_path:
-        log.error("❌ Falha ao gravar vídeo 9:16.")
-        sys.exit(1)
-
-    # 5. Processar Vídeo (Converter para MP4 e adicionar Áudio)
-    log.info("🎞️ Mixando áudio e convertendo vídeo para MP4...")
-    mp4_path = processar_video_final(webm_path, PREVIEW_VID)
-    if not mp4_path:
-        log.error("❌ Falha no processamento via FFmpeg.")
-        sys.exit(1)
-
-    # 6. Publicar Foto no Facebook
-    log.info("📘 Publicando Foto 4:5 no Facebook...")
-    foto_id = publicar_foto(img_bytes, legenda, hashtags)
-
-    # 7. Publicar Vídeo no Facebook Reels
-    log.info("📘 Publicando Reel 9:16 no Facebook...")
-    reel_id = publicar_video(mp4_path, legenda, hashtags)
-
-    if not foto_id and not reel_id:
-        log.error("❌ Ambas as publicações falharam. O índice NÃO será avançado.")
-        sys.exit(1)
-        
-    if not foto_id or not reel_id:
-        log.warning("⚠️ Uma das mídias falhou ao publicar, mas a outra foi com sucesso. Avançando índice.")
-
-    # 8. Avançar índice
+    # 5. Avançar índice
     novo_idx = idx + 1
     salvar_indice(novo_idx)
-    log.info(f"✅ Fluxo do Post {novo_idx}/18 completo!")
+    restantes = TOTAL_POSTS - novo_idx
+    log.info(f"✅ Post {novo_idx}/18 publicado! {restantes} restantes.")
     log.info("🏁 Finalizado com sucesso.")
 
 
