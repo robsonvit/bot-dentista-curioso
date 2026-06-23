@@ -143,19 +143,24 @@ def main():
     if not webm_path:
         log.error("❌ Falha ao gravar vídeo 9:16.")
         sys.exit(1)
+        
+    # 5. Baixar Música em Alta (Dinâmico)
+    from audio_downloader import baixar_audio_em_alta
+    log.info("🎵 Preparando áudio dinâmico...")
+    baixar_audio_em_alta()
 
-    # 5. Processar Vídeo (Converter para MP4 e adicionar Áudio)
+    # 6. Processar Vídeo (Converter para MP4 e adicionar Áudio)
     log.info("🎞️ Mixando áudio e convertendo vídeo para MP4...")
     mp4_path = processar_video_final(webm_path, PREVIEW_VID)
     if not mp4_path:
         log.error("❌ Falha no processamento via FFmpeg.")
         sys.exit(1)
 
-    # 6. Publicar Foto no Facebook
+    # 7. Publicar Foto no Facebook
     log.info("📘 Publicando Foto 4:5 no Facebook...")
     foto_id = publicar_foto(img_bytes, legenda, hashtags)
 
-    # 7. Publicar Vídeo no Facebook Reels
+    # 8. Publicar Vídeo no Facebook Reels
     log.info("📘 Publicando Reel 9:16 no Facebook...")
     reel_id = publicar_video(mp4_path, legenda, hashtags)
 
@@ -166,7 +171,7 @@ def main():
     if not foto_id or not reel_id:
         log.warning("⚠️ Uma das mídias falhou ao publicar, mas a outra foi com sucesso. Avançando índice.")
 
-    # 8. Avançar índice
+    # 9. Avançar índice
     novo_idx = idx + 1
     salvar_indice(novo_idx)
     log.info(f"✅ Fluxo do Post {novo_idx}/18 completo!")
