@@ -69,8 +69,11 @@ def baixar_audio_em_alta() -> str | None:
     random.shuffle(musicas_top_50)
     
     for musica_escolhida in musicas_top_50:
-        query = f"ytsearch1:{musica_escolhida} oficial audio"
-        log.info(f"🎯 Tentando baixar a música selecionada: '{musica_escolhida}'")
+        # Trocando ytsearch1 por scsearch1 (SoundCloud)
+        # O YouTube está bloqueando IPs do GitHub Actions ativamente. O SoundCloud não possui essa restrição pesada,
+        # além de ser extremamente mais rápido e focado em áudio, retornando faixas de alta qualidade que servem perfeitamente pro Reel.
+        query = f"scsearch1:{musica_escolhida}"
+        log.info(f"🎯 Tentando baixar a música selecionada via SoundCloud: '{musica_escolhida}'")
         
         output_template = str(AUDIOS_DIR / "musica_%(id)s.%(ext)s")
         
@@ -84,8 +87,7 @@ def baixar_audio_em_alta() -> str | None:
             }],
             'quiet': True,
             'no_warnings': True,
-            'match_filter': yt_dlp.utils.match_filter_func("duration < 300"), # até 5 minutos
-            'extractor_args': {'youtube': ['player_client=android,mweb,web']}, # BYPASS YOUTUBE BOT BLOCK
+            # 'match_filter': yt_dlp.utils.match_filter_func("duration < 300"), # até 5 minutos (nem precisa no SC mas vamos manter por segurança se a api suportar)
         }
         
         try:
