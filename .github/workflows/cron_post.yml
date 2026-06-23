@@ -1,0 +1,85 @@
+name: 🦷 Dentista Curioso Bot
+
+on:
+  # ── 18 disparos horários: 7h às 00h (horário de Brasília = UTC-3) ───────────
+  schedule:
+    - cron: '0 10 * * *'   # 07h BRT — Post 01 (Técnico: Curetas de Gracey)
+    - cron: '0 11 * * *'   # 08h BRT — Post 02 (Meme: Abridor de boca)
+    - cron: '0 12 * * *'   # 09h BRT — Post 03 (Quiz: Profilaxia AHA)
+    - cron: '0 13 * * *'   # 10h BRT — Post 04 (Mito: Dentes de leite têm raiz?)
+    - cron: '0 14 * * *'   # 11h BRT — Post 05 (Carreira: TCLE e contrato)
+    - cron: '0 15 * * *'   # 12h BRT — Post 06 (Técnico: Localizador apical)
+    - cron: '0 16 * * *'   # 13h BRT — Post 07 (Meme: Matriz metálica)
+    - cron: '0 17 * * *'   # 14h BRT — Post 08 (Quiz: 2º canal em incisivos)
+    - cron: '0 18 * * *'   # 15h BRT — Post 09 (Mito: Enxaguante com álcool)
+    - cron: '0 19 * * *'   # 16h BRT — Post 10 (Carreira: Olhadinha de graça)
+    - cron: '0 20 * * *'   # 17h BRT — Post 11 (Técnico: Núcleo vs Pino)
+    - cron: '0 21 * * *'   # 18h BRT — Post 12 (Meme: Lista de materiais)
+    - cron: '0 22 * * *'   # 19h BRT — Post 13 (Quiz: Fórceps pré-molares)
+    - cron: '0 23 * * *'   # 20h BRT — Post 14 (Mito: Laser vs caseiro)
+    - cron: '0 0 * * *'    # 21h BRT — Post 15 (Carreira: Follow-up pós-cirúrgico)
+    - cron: '0 1 * * *'    # 22h BRT — Post 16 (Técnico: Cárie bite-wing)
+    - cron: '0 2 * * *'    # 23h BRT — Post 17 (Meme: Sugador agressivo)
+    - cron: '0 3 * * *'    # 00h BRT — Post 18 (Quiz: Erupção 1º molar)
+  workflow_dispatch:        # Execução manual pelo painel do GitHub
+
+concurrency:
+  group: dentista-curioso-bot
+  cancel-in-progress: false
+
+jobs:
+  postar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: 📥 Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: 🐍 Configurar Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: 📦 Instalar dependências Python
+        run: pip install -r requirements.txt
+
+      - name: 🌐 Instalar Playwright Chromium
+        run: playwright install chromium --with-deps
+
+      - name: 🤖 Rodar Bot Dentista Curioso
+        env:
+          GEMINI_API_KEY:        ${{ secrets.GEMINI_API_KEY }}
+          FB_TOKEN:              ${{ secrets.FB_TOKEN }}
+          FB_PAGE_ID:            ${{ secrets.FB_PAGE_ID }}
+          GOOGLE_STORAGE_STATE:  ${{ secrets.GOOGLE_STORAGE_STATE }}
+        run: |
+          git config pull.rebase true
+          git branch --set-upstream-to=origin/main main || true
+          git pull origin main || true
+          python bot_main.py
+
+      - name: 💾 Salvar índice do post publicado
+        if: always()
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add post_index.json 2>/dev/null || true
+          if git diff --cached --quiet; then
+            echo "ℹ️ Nenhuma mudança de índice para salvar."
+          else
+            git commit -m "chore: avançar índice de posts [skip ci]"
+            for i in {1..3}; do
+              echo "🔄 Tentativa de push $i..."
+              git pull --rebase origin main || true
+              if git push origin HEAD:main; then
+                echo "✅ Índice salvo!"
+                exit 0
+              fi
+              sleep 5
+            done
+            echo "❌ Falha ao salvar índice."
+            exit 1
+          fi

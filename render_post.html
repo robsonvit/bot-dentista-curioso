@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1080">
+  <title>DentPost Renderer</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800;900&family=DM+Sans:wght@300;400;500;700;800&display=swap');
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a24;
+      --accent: #0077b6;
+      --text: #f0ede8;
+      --muted: #888;
+      --border: rgba(255,255,255,0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    #post-canvas {
+      width: 1080px;
+      height: 1080px;
+      position: relative;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    /* ── Utilitários ─────────────────────────────────────────────────────────── */
+    .fill { position: absolute; inset: 0; }
+    .center { display: flex; align-items: center; justify-content: center; }
+    .col { flex-direction: column; }
+
+    /* ── TEMPLATE: TECNICO ───────────────────────────────────────────────────── */
+    .tpl-tecnico {
+      background: linear-gradient(145deg, #0c3460 0%, #0a1628 50%, #050d1a 100%);
+    }
+
+    .tecnico-accent-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #0077b6, #00b4d8, #0077b6);
+    }
+
+    .tecnico-bg-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,119,182,0.15) 0%, transparent 70%);
+      top: -100px; right: -100px;
+    }
+
+    .tecnico-tag {
+      position: absolute;
+      top: 48px; left: 48px;
+      background: rgba(0,119,182,0.25);
+      border: 1px solid rgba(0,119,182,0.6);
+      border-radius: 10px;
+      padding: 10px 22px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tecnico-tag span {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      color: #90e0ef;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .tecnico-handle {
+      position: absolute;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      padding: 10px 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tecnico-handle-logo {
+      width: 34px; height: 34px;
+      border-radius: 50%;
+      background: #0077b6;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      font-size: 18px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .tecnico-handle span {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 26px;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.02em;
+    }
+
+    .tecnico-content {
+      position: absolute;
+      inset: 140px 60px 110px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .tecnico-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      font-size: 72px;
+      color: #ffffff;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 30px;
+    }
+
+    .tecnico-divider {
+      width: 80px;
+      height: 4px;
+      background: linear-gradient(90deg, #0077b6, #00b4d8);
+      border-radius: 2px;
+      margin-bottom: 36px;
+    }
+
+    .tecnico-items {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .tecnico-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-left: 3px solid #0077b6;
+      border-radius: 0 12px 12px 0;
+      padding: 14px 20px;
+    }
+
+    .tecnico-item-key {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 700;
+      font-size: 30px;
+      color: #90e0ef;
+    }
+
+    .tecnico-item-val {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 26px;
+      color: rgba(240,237,232,0.8);
+      line-height: 1.4;
+    }
+
+    /* ── TEMPLATE: MEME / CARREIRA (Twitter Dark) ────────────────────────────── */
+    .tpl-meme {
+      background: #15202b;
+    }
+
+    .meme-bg-pattern {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 20% 20%, rgba(29,161,242,0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(29,161,242,0.04) 0%, transparent 50%);
+    }
+
+    .meme-card {
+      position: absolute;
+      inset: 80px;
+      background: #192734;
+      border-radius: 24px;
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 56px 60px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .meme-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .meme-avatar {
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0077b6, #00b4d8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      font-size: 32px;
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .meme-author-info { display: flex; flex-direction: column; }
+    .meme-author-name {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 32px;
+      color: #fff;
+    }
+    .meme-author-handle {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 26px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    .meme-twitter-icon {
+      margin-left: auto;
+      width: 42px; height: 42px;
+      opacity: 0.4;
+    }
+
+    .meme-text {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 38px;
+      color: #fff;
+      line-height: 1.55;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .meme-footer {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      margin-top: 36px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .meme-stat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 26px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ── TEMPLATE: QUIZ ──────────────────────────────────────────────────────── */
+    .tpl-quiz {
+      background: linear-gradient(145deg, #0a3d6b 0%, #051a2e 60%, #010d1a 100%);
+    }
+
+    .quiz-top-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #00b4d8, #48cae4, #00b4d8);
+    }
+
+    .quiz-tag {
+      position: absolute;
+      top: 48px; left: 48px;
+      background: rgba(0,180,216,0.2);
+      border: 1px solid rgba(0,180,216,0.5);
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      color: #90e0ef;
+      letter-spacing: 0.1em;
+    }
+
+    .quiz-content {
+      position: absolute;
+      inset: 140px 60px 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .quiz-emoji {
+      font-size: 64px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .quiz-question {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 46px;
+      color: #fff;
+      line-height: 1.2;
+      text-align: center;
+      margin-bottom: 44px;
+      letter-spacing: -0.02em;
+    }
+
+    .quiz-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+      margin-bottom: 36px;
+    }
+
+    .quiz-option {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 20px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 28px;
+      color: #f0ede8;
+      text-align: center;
+      line-height: 1.3;
+    }
+
+    .quiz-answer-badge {
+      background: rgba(0,119,182,0.3);
+      border: 1px solid rgba(0,119,182,0.6);
+      border-radius: 40px;
+      padding: 16px 40px;
+      text-align: center;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 30px;
+      color: #90e0ef;
+      margin: 0 auto;
+    }
+
+    .quiz-handle {
+      position: absolute;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      color: rgba(255,255,255,0.4);
+      white-space: nowrap;
+    }
+
+    /* ── TEMPLATE: MITO ──────────────────────────────────────────────────────── */
+    .tpl-mito {
+      background: linear-gradient(145deg, #4a1208 0%, #2d0a05 50%, #150403 100%);
+    }
+
+    .mito-glow {
+      position: absolute;
+      width: 700px; height: 700px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(220,80,20,0.12) 0%, transparent 70%);
+      top: -150px; left: -150px;
+    }
+
+    .mito-tag {
+      position: absolute;
+      top: 48px; left: 48px;
+      background: rgba(220,80,20,0.2);
+      border: 1px solid rgba(220,80,20,0.5);
+      border-radius: 10px;
+      padding: 10px 22px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 26px;
+      color: #fb923c;
+      letter-spacing: 0.1em;
+    }
+
+    .mito-content {
+      position: absolute;
+      inset: 140px 60px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .mito-headline {
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      font-size: 50px;
+      color: #fb923c;
+      letter-spacing: 0.06em;
+      margin-bottom: 28px;
+    }
+
+    .mito-claim {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 40px;
+      color: rgba(240,237,232,0.9);
+      line-height: 1.3;
+      margin-bottom: 40px;
+      padding: 0 20px;
+    }
+
+    .mito-verdict {
+      font-family: 'Syne', sans-serif;
+      font-weight: 900;
+      font-size: 110px;
+      letter-spacing: -0.03em;
+      margin-bottom: 28px;
+      line-height: 1;
+    }
+    .mito-verdict.mito { color: #ef4444; text-shadow: 0 0 40px rgba(239,68,68,0.5); }
+    .mito-verdict.fato { color: #22c55e; text-shadow: 0 0 40px rgba(34,197,94,0.5); }
+
+    .mito-explanation {
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 400;
+      font-size: 28px;
+      color: rgba(240,237,232,0.6);
+      line-height: 1.5;
+      max-width: 880px;
+    }
+
+    .mito-handle {
+      position: absolute;
+      bottom: 44px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 600;
+      font-size: 24px;
+      color: rgba(255,255,255,0.35);
+      white-space: nowrap;
+    }
+
+    /* ── BG IMAGE LAYER ───────────────────────────────────────────────────────── */
+    .bg-image {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.45) saturate(0.8);
+    }
+  </style>
+</head>
+<body>
+<div id="post-canvas"></div>
+
+<script>
+// ─── Dados injetados pelo Python via Playwright ────────────────────────────
+const data = window.POST_DATA || {};
+const LOGO_SRC = window.LOGO_SRC || null;
+const canvas = document.getElementById('post-canvas');
+
+// ─── Utilitários ──────────────────────────────────────────────────────────
+function esc(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function renderLogo() {
+  const logoDiv = LOGO_SRC
+    ? `<img src="${LOGO_SRC}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;">`
+    : `<div class="tecnico-handle-logo">D</div>`;
+  return logoDiv;
+}
+
+// ─── Renderer por tipo ────────────────────────────────────────────────────
+
+function renderTecnico() {
+  const items = (data.items || []).slice(0, 4);
+  const title = (data.topic_title || data.text || '').toUpperCase();
+  const imgUrl = data.imageUrl || null;
+
+  let itemsHtml = items.map(item => `
+    <div class="tecnico-item">
+      <div class="tecnico-item-key">${esc(item.key)}</div>
+      <div class="tecnico-item-val">${esc(item.value)}</div>
+    </div>
+  `).join('');
+
+  canvas.className = 'tpl-tecnico';
+  canvas.innerHTML = `
+    ${imgUrl ? `<div class="bg-image" style="background-image:url('${imgUrl}')"></div>` : ''}
+    <div class="tecnico-accent-bar"></div>
+    <div class="tecnico-bg-glow"></div>
+    <div class="tecnico-tag"><span>◆ TÉCNICO ◆</span></div>
+    <div class="tecnico-content">
+      <div class="tecnico-title">${esc(title)}</div>
+      <div class="tecnico-divider"></div>
+      <div class="tecnico-items">${itemsHtml}</div>
+    </div>
+    <div class="tecnico-handle">
+      ${renderLogo()}
+      <span>@dentistaaa_curioso</span>
+    </div>
+  `;
+}
+
+function renderMeme() {
+  const isCarreira = data.type === 'carreira';
+  const tweet = data.tweet_text || data.text || '';
+  const tagLabel = isCarreira ? '◆ CARREIRA ◆' : '◆ MEME ◆';
+  const tagColor = isCarreira ? 'rgba(100,120,180,0.3)' : 'rgba(29,161,242,0.15)';
+  const tagBorder = isCarreira ? 'rgba(100,120,180,0.5)' : 'rgba(29,161,242,0.4)';
+
+  // Formata quebras de linha do tweet
+  const tweetLines = tweet.split(/\\n|\n/).map(l => `<p style="margin-bottom:8px">${esc(l)}</p>`).join('');
+
+  // Gera likes e hora aleatórios para parecer real
+  const likes = ['1.2K','2.4K','3.7K','5.1K','7.8K','12K','4.3K','9.6K'];
+  const likeVal = likes[Math.floor(Math.random() * likes.length)];
+  const hrs = ['08:14','09:32','10:47','13:22','14:55','16:08','19:41','21:30'];
+  const hrVal = hrs[Math.floor(Math.random() * hrs.length)];
+
+  canvas.className = 'tpl-meme';
+  canvas.innerHTML = `
+    <div class="meme-bg-pattern"></div>
+    <div style="position:absolute;top:40px;left:50%;transform:translateX(-50%);
+      background:${tagColor};border:1px solid ${tagBorder};border-radius:10px;
+      padding:8px 20px;font-family:'Syne',sans-serif;font-weight:800;font-size:22px;
+      color:rgba(255,255,255,0.7);letter-spacing:0.1em;">${tagLabel}</div>
+    <div class="meme-card" style="top:110px;">
+      <div class="meme-header">
+        <div class="meme-avatar">D</div>
+        <div class="meme-author-info">
+          <div class="meme-author-name">Dentista Curioso</div>
+          <div class="meme-author-handle">@dentistaa_curioso</div>
+        </div>
+        <svg class="meme-twitter-icon" viewBox="0 0 24 24" fill="white">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.74l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+      </div>
+      <div class="meme-text">${tweetLines}</div>
+      <div class="meme-footer">
+        <div class="meme-stat">❤️ <span>${likeVal}</span></div>
+        <div class="meme-stat">🔁 <span>${Math.floor(Math.random()*500+50)}</span></div>
+        <div class="meme-stat" style="margin-left:auto;">${hrVal}</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderQuiz() {
+  const question = data.quiz_question || data.text || '';
+  const options = data.quiz_options || [];
+  const letters = ['A', 'B', 'C', 'D'];
+
+  let optHtml = options.slice(0,4).map((opt, i) => `
+    <div class="quiz-option"><strong>${letters[i]})</strong> ${esc(opt)}</div>
+  `).join('');
+
+  canvas.className = 'tpl-quiz';
+  canvas.innerHTML = `
+    <div class="quiz-top-bar"></div>
+    <div class="quiz-tag">❓ QUIZ TÉCNICO</div>
+    <div class="quiz-content">
+      <div class="quiz-question">${esc(question)}</div>
+      <div class="quiz-options">${optHtml}</div>
+      <div class="quiz-answer-badge">💬 Resposta na Legenda!</div>
+    </div>
+    <div class="quiz-handle">@dentistaaa_curioso</div>
+  `;
+}
+
+function renderMito() {
+  const claim     = data.mito_claim || '';
+  const verdict   = (data.mito_verdict || 'mito').toLowerCase();
+  const explain   = data.mito_explanation || '';
+  const verdictUpper = verdict === 'fato' ? 'FATO ✓' : 'MITO ✗';
+
+  canvas.className = 'tpl-mito';
+  canvas.innerHTML = `
+    <div class="mito-glow"></div>
+    <div class="mito-tag">🚫 MITO OU FATO?</div>
+    <div class="mito-content">
+      <div class="mito-headline">MITO OU FATO?</div>
+      <div class="mito-claim">"${esc(claim)}"</div>
+      <div class="mito-verdict ${verdict}">${verdictUpper}</div>
+      <div class="mito-explanation">${esc(explain)}</div>
+    </div>
+    <div class="mito-handle">@dentistaaa_curioso</div>
+  `;
+}
+
+// ─── Roteador principal ────────────────────────────────────────────────────
+const type = (data.type || 'tecnico').toLowerCase();
+
+if      (type === 'tecnico')                 renderTecnico();
+else if (type === 'meme' || type === 'carreira') renderMeme();
+else if (type === 'quiz')                    renderQuiz();
+else if (type === 'mito')                    renderMito();
+else                                         renderTecnico(); // fallback
+</script>
+</body>
+</html>
